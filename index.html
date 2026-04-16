@@ -1,124 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ABDM FHIR Viewer</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/main.css">
-  <!-- PDF.js — Mozilla's open-source PDF renderer -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-</head>
-<body>
-
-  <!-- ── Topbar ── -->
-  <div id="topbar">
-    <div class="app-logo">ABDM <span>FHIR</span> <sub>Viewer</sub></div>
-    <div class="topbar-spacer"></div>
-    <div id="status-dot"></div>
-    <div id="status-text">Load a FHIR document to begin</div>
-  </div>
-
-  <div id="main">
-
-    <!-- ── Upload panel: dropzone + paste ── -->
-    <div id="upload-panel">
-      <div
-        id="dropzone"
-        onclick="document.getElementById('file-input').click()"
-        ondragover="handleDropzoneOver(event)"
-        ondragleave="handleDropzoneLeave()"
-        ondrop="handleDropzoneDrop(event)"
-      >
-        <div class="dropzone-icon">📄</div>
-        <h3>Drop a FHIR Bundle JSON here</h3>
-        <p>or click to browse · Supports all ABDM / NDHM document types</p>
-        <div class="dropzone-chips">
-          <span class="doc-type-chip">OPD Consultation</span>
-          <span class="doc-type-chip">Discharge Summary</span>
-          <span class="doc-type-chip">Lab Report</span>
-          <span class="doc-type-chip">Prescription</span>
-          <span class="doc-type-chip">Immunization</span>
-          <span class="doc-type-chip">Invoice</span>
-          <span class="doc-type-chip">Wellness Record</span>
-          <span class="doc-type-chip">Health Document</span>
-        </div>
-      </div>
-
-      <input
-        type="file"
-        id="file-input"
-        accept=".json,application/json"
-        onchange="handleFileInputChange(event)"
-      >
-
-      <div class="or-divider">or paste JSON</div>
-
-      <textarea
-        id="paste-input"
-        placeholder='{"resourceType":"Bundle","type":"document","entry":[...]}'
-      ></textarea>
-
-      <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-        <button class="btn btn-primary" onclick="loadPastedJson()">Parse &amp; view</button>
-        <span style="font-size:12px;color:var(--color-text2)">R4 · eka.care · HAPI · any NDHM-conformant bundle</span>
-      </div>
-    </div>
-
-    <!-- ── Patient record view ── -->
-    <div id="record">
-      <div id="doc-banner"></div>
-      <div id="patient-header"></div>
-      <div class="info-grid" id="info-grid"></div>
-      <div class="tab-bar" id="tab-bar"></div>
-      <div id="tab-content"></div>
-    </div>
-
-  </div>
-
-  <!-- ── Toast notification ── -->
-  <div id="toast-notification"></div>
-
-  <!-- ── Media Viewer Modal ── -->
-  <div id="media-viewer-modal" role="dialog" aria-modal="true" aria-labelledby="media-viewer-title">
-    <div id="media-viewer-backdrop" onclick="closeMediaViewer()"></div>
-    <div id="media-viewer-container">
-      <div id="media-viewer-header">
-        <div id="media-viewer-title" class="media-viewer-title-text"></div>
-        <button class="btn btn-secondary mv-close-btn" onclick="closeMediaViewer()" title="Close (Esc)">✕</button>
-      </div>
-      <div id="pdf-page-controls">
-        <button class="btn btn-secondary" onclick="pdfPrevPage()">← Prev</button>
-        <span class="pdf-page-label">
-          Page <span id="pdf-page-current">1</span> of <span id="pdf-page-total">?</span>
-        </span>
-        <button class="btn btn-secondary" onclick="pdfNextPage()">Next →</button>
-      </div>
-      <div id="media-viewer-body"></div>
-    </div>
-  </div>
-
-  <!--
-    Script load order matters — each file depends on the ones above it:
-      1. constants  — pure data, no dependencies
-      2. state      — mutable globals, depends on constants (DEFAULT_DOC_TYPE)
-      3. helpers    — pure functions, reads state + constants
-      4. ui         — DOM handlers, reads/writes state
-      5. parser     — parses JSON, writes state, calls ui + renderers
-      6. tab-renderers — renders tab content, reads state + helpers
-      7. tabs       — builds tab bar, calls tab-renderers
-      8. renderers  — renders record sections, calls tabs
-  -->
-  <script src="js/constants.js"></script>
-  <script src="js/state.js"></script>
-  <script src="js/helpers.js"></script>
-  <script src="js/ui.js"></script>
-  <script src="js/parser.js"></script>
-  <script src="js/tab-renderers.js"></script>
-  <script src="js/tabs.js"></script>
-  <script src="js/renderers.js"></script>
-  <script src="js/media-viewer.js"></script>
-
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ABDM FHIR Viewer</title>
+    <!-- PDF.js for PDF rendering in media viewer -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
