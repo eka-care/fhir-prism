@@ -1,5 +1,5 @@
 import { useRef, useState, type DragEvent, type ChangeEvent } from 'react';
-import { useFhir } from '../context/FhirContext';
+import { useFhirStore } from '../store/fhirStore';
 
 const DOC_TYPE_CHIPS = [
   'OPD Consultation', 'Discharge Summary', 'Lab Report',
@@ -7,9 +7,8 @@ const DOC_TYPE_CHIPS = [
 ];
 
 export function UploadPanel() {
-  const { loadJson } = useFhir();
+  const { loadJson, pasteText, setPasteText } = useFhirStore();
   const [dragging, setDragging] = useState(false);
-  const [pasteText, setPasteText] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function readFile(file: File) {
