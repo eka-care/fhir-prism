@@ -61,6 +61,7 @@ function openMediaViewer(base64Data, contentType, title) {
 
   titleEl.textContent   = title || 'Attachment';
   bodyEl.innerHTML      = '';
+  bodyEl.style.padding  = '';   // reset to CSS default (20px)
   pdfCtrl.style.display = 'none';
   modal.style.display   = 'flex';
   document.body.style.overflow = 'hidden';
@@ -71,6 +72,8 @@ function openMediaViewer(base64Data, contentType, title) {
     _renderPdf(base64Data);
   } else if (type.startsWith('image/') || type.includes('image')) {
     _renderImage(base64Data, contentType);
+  } else if (type === 'text/plain' || type === 'application/json' || type.includes('text')) {
+    _renderBase64Text(base64Data, type);
   } else {
     // Unknown type — offer a download link
     const safeType = contentType.replace(/"/g, '');
@@ -87,12 +90,88 @@ function openMediaViewer(base64Data, contentType, title) {
   }
 }
 
+/**
+ * Opens the modal viewer for a URL-based document.
+ * Renders in-modal without redirecting to a new tab.
+ * @param {string} url         - document URL
+ * @param {string} contentType - MIME type (may be empty; inferred from URL extension)
+ * @param {string} title       - display title
+ */
+async function openMediaViewerByUrl(url, contentType, title) {
+  const modal   = document.getElementById('media-viewer-modal');
+  const titleEl = document.getElementById('media-viewer-title');
+  const bodyEl  = document.getElementById('media-viewer-body');
+  const pdfCtrl = document.getElementById('pdf-page-controls');
+
+  _pdfDoc = null;
+  _currentPage = 1;
+  _totalPages = 0;
+
+  titleEl.textContent   = title || 'Document';
+  bodyEl.innerHTML      = '';
+  bodyEl.style.padding  = '';   // reset to CSS default (20px)
+  pdfCtrl.style.display = 'none';
+  modal.style.display   = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  // Infer type from URL extension if contentType is absent
+  const ext = (url.split('?')[0].split('.').pop() || '').toLowerCase();
+  const EXT_MIME = {
+    pdf: 'application/pdf',
+    jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+    gif: 'image/gif', webp: 'image/webp', svg: 'image/svg+xml',
+    txt: 'text/plain', json: 'application/json',
+  };
+  const type = ((contentType || EXT_MIME[ext] || '')).toLowerCase();
+
+  if (type.startsWith('image/') || ['jpg','jpeg','png','gif','webp','svg'].includes(ext)) {
+    bodyEl.style.padding = '20px';
+    bodyEl.innerHTML = `<img src="${url}" class="mv-image" alt="${escapeHtml(title || 'Image')}">`;
+  } else if (type === 'text/plain' || type === 'application/json' || ['txt','json'].includes(ext)) {
+    bodyEl.innerHTML = `<div class="mv-placeholder"><div class="mv-spinner"></div><div style="margin-top:12px;color:var(--color-text2)">Loading…</div></div>`;
+    try {
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const text = await resp.text();
+      let display = text;
+      if (type === 'application/json' || ext === 'json') {
+        try { display = JSON.stringify(JSON.parse(text), null, 2); } catch (_) {}
+      }
+      bodyEl.style.padding = '20px';
+      bodyEl.innerHTML = `<pre class="mv-text-content">${escapeHtml(display)}</pre>`;
+    } catch (err) {
+      bodyEl.innerHTML = `<div class="mv-placeholder"><div class="mv-placeholder-icon">⚠️</div><div style="color:var(--color-text2)">Failed to load document</div><code style="font-size:11px;color:var(--color-text3);margin-top:6px">${escapeHtml(err.message)}</code></div>`;
+    }
+  } else {
+    // PDF or unknown — open in a new tab
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+    window.open(url, '_blank', 'noopener,noreferrer');
+  }
+}
+
 // ─── Image renderer ────────────────────────────────────────────────────────
 
 function _renderImage(base64Data, contentType) {
   const bodyEl = document.getElementById('media-viewer-body');
   const dataUrl = `data:${contentType};base64,${base64Data}`;
   bodyEl.innerHTML = `<img src="${dataUrl}" class="mv-image" alt="Attachment image">`;
+}
+
+// ─── Text / JSON renderer (base64) ────────────────────────────────────────
+
+function _renderBase64Text(base64Data, contentType) {
+  const bodyEl = document.getElementById('media-viewer-body');
+  try {
+    let text = atob(base64Data);
+    if (contentType === 'application/json') {
+      try { text = JSON.stringify(JSON.parse(text), null, 2); } catch (_) {}
+    }
+    bodyEl.style.padding = '20px';
+    bodyEl.innerHTML = `<pre class="mv-text-content">${escapeHtml(text)}</pre>`;
+  } catch (err) {
+    bodyEl.innerHTML = `<div class="mv-placeholder"><div class="mv-placeholder-icon">⚠️</div><div style="color:var(--color-text2)">Failed to decode text</div></div>`;
+  }
 }
 
 // ─── PDF renderer (PDF.js) ─────────────────────────────────────────────────

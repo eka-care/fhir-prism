@@ -503,3 +503,36 @@ input:focus, select:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgb
 
 /* View button on doc-ref rows */
 .doc-ref-view-btn { flex-shrink: 0; margin-left: auto; }
+
+/* URL-fetched text / JSON preview */
+.mv-text-content {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--color-text);
+  width: 100%;
+  text-align: left;
+  margin: 0;
+}
+
+
+/* IPS collapsible section header */
+.ips-section-header {
+  cursor: pointer;
+  user-select: none;
+}
+.ips-section-header:hover {
+  filter: brightness(0.96);
+}
+.ips-toggle-icon {
+  font-size: 12px;
+  color: var(--color-text3);
+  margin-left: 4px;
+  flex-shrink: 0;
+  transition: transform 0.18s ease;
+}
+.ips-toggle-icon.collapsed {
+  transform: rotate(-90deg);
+}

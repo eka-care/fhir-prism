@@ -464,8 +464,10 @@ function renderDiagnosticReportsTab(container) {
                     : '👁 View';
         return `<button class="btn btn-secondary" style="margin-top:8px" onclick="openMediaViewerById('${attId}')">${label}</button>`;
       } else if (pfUrl) {
-        return `<a href="${pfUrl}" target="_blank" rel="noopener noreferrer"
-          class="btn btn-secondary" style="margin-top:8px;text-decoration:none">View ↗</a>`;
+        const safeUrl   = pfUrl.replace(/'/g, "\\'");
+        const safeTitle = pfTitle.replace(/'/g, "\\'");
+        const safeMime  = pfMime.replace(/'/g, "\\'");
+        return `<button class="btn btn-secondary" style="margin-top:8px" onclick="openMediaViewerByUrl('${safeUrl}','${safeMime}','${safeTitle}')">View</button>`;
       }
       return '';
     }).filter(Boolean).join(' ');
@@ -832,9 +834,11 @@ function renderDocumentRefsTab(container) {
           ${mimeType.includes('pdf') ? '📄 View PDF' : mimeType.includes('image') ? '🖼 View Image' : '👁 View'}
         </button>`;
       } else if (docUrl) {
-        // External URL
-        actionBtn = `<a href="${docUrl}" target="_blank" rel="noopener noreferrer"
-          class="btn btn-secondary doc-ref-view-btn" style="text-decoration:none">View ↗</a>`;
+        // External URL — open in modal, not a new tab
+        const safeUrl   = docUrl.replace(/'/g, "\\'");
+        const safeTitle = displayTitle.replace(/'/g, "\\'");
+        const safeMime  = mimeType.replace(/'/g, "\\'");
+        actionBtn = `<button class="btn btn-secondary doc-ref-view-btn" onclick="openMediaViewerByUrl('${safeUrl}','${safeMime}','${safeTitle}')">View</button>`;
       }
 
       return `<div class="doc-ref-row">
@@ -1169,6 +1173,16 @@ function renderIPSEntry(resource) {
 
 // ─── IPS Summary ───────────────────────────────────────────────────────────
 
+/** Toggles an IPS section open/closed. */
+function toggleIPSSection(id) {
+  const body = document.getElementById(id);
+  const icon = document.getElementById(id + '-icon');
+  if (!body) return;
+  const collapsed = body.style.display === 'none';
+  body.style.display = collapsed ? '' : 'none';
+  if (icon) icon.classList.toggle('collapsed', !collapsed);
+}
+
 function renderIPSSummaryTab(container) {
   const composition = (resourceMap['Composition'] || [])[0];
   if (!composition?.section?.length) {
@@ -1182,6 +1196,7 @@ function renderIPSSummaryTab(container) {
     const sectionTitle  = section.title || sectionConfig.title || 'Section';
     const emptyReason   = section.emptyReason?.text || (section.emptyReason?.coding || [])[0]?.display || '';
     const narrative     = section.text?.div ? sanitizeNarrativeDiv(section.text.div) : '';
+    const secId         = 'ips-sec-' + Math.random().toString(36).slice(2, 9);
 
     const entries = (section.entry || [])
       .map(ref => resolveReference(ref.reference))
@@ -1190,33 +1205,36 @@ function renderIPSSummaryTab(container) {
     const indent = depth > 0 ? 'margin-left:20px;' : '';
     const radius  = depth > 0 ? 'var(--radius-sm)' : 'var(--radius)';
 
+    let bodyContent = '';
+    if (emptyReason && !entries.length && !section.section?.length) {
+      bodyContent = `<div style="padding:12px 16px;font-style:italic;color:var(--color-text3)">Not available: ${emptyReason}</div>`;
+    } else if (entries.length) {
+      bodyContent = entries.map(r => renderIPSEntry(r)).join('');
+    } else if (narrative && !section.section?.length) {
+      bodyContent = `<div style="padding:12px 16px;font-size:13px;line-height:1.7">${narrative}</div>`;
+    } else if (!section.section?.length) {
+      bodyContent = `<div style="padding:12px 16px;color:var(--color-text3);font-size:13px">No entries</div>`;
+    }
+
+    // Nested sub-sections go inside the collapsible body
+    if (section.section?.length) {
+      bodyContent += section.section.map(sub => renderSection(sub, depth + 1)).join('');
+    }
+
     let html = `<div style="margin-bottom:14px;${indent}">
-      <div style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--color-surface2);border-radius:${radius} ${radius} 0 0;border:0.5px solid var(--color-border)">
+      <div class="ips-section-header" onclick="toggleIPSSection('${secId}')"
+           style="display:flex;align-items:center;gap:8px;padding:9px 14px;background:var(--color-surface2);border-radius:${radius} ${radius} 0 0;border:0.5px solid var(--color-border)">
         <span style="font-size:15px">${sectionConfig.icon || '📋'}</span>
         <span style="font-size:13px;font-weight:600">${sectionTitle}</span>
         ${sectionCode ? `<span style="font-size:10px;font-family:var(--font-mono);color:var(--color-text3)">${sectionCode}</span>` : ''}
-        ${entries.length ? `<span class="tag tag-gray" style="margin-left:auto;font-size:10px">${entries.length}</span>` : ''}
+        ${entries.length ? `<span class="tag tag-gray" style="font-size:10px">${entries.length}</span>` : ''}
+        <span class="ips-toggle-icon" id="${secId}-icon" style="margin-left:auto">▾</span>
       </div>
-      <div style="border:0.5px solid var(--color-border);border-top:none;border-radius:0 0 ${radius} ${radius};overflow:hidden;background:var(--color-surface)">`;
+      <div id="${secId}" style="border:0.5px solid var(--color-border);border-top:none;border-radius:0 0 ${radius} ${radius};overflow:hidden;background:var(--color-surface)">
+        ${bodyContent}
+      </div>
+    </div>`;
 
-    if (emptyReason && !entries.length && !section.section?.length) {
-      html += `<div style="padding:12px 16px;font-style:italic;color:var(--color-text3)">Not available: ${emptyReason}</div>`;
-    } else if (entries.length) {
-      html += entries.map(r => renderIPSEntry(r)).join('');
-    } else if (narrative && !section.section?.length) {
-      html += `<div style="padding:12px 16px;font-size:13px;line-height:1.7">${narrative}</div>`;
-    } else if (!section.section?.length) {
-      html += `<div style="padding:12px 16px;color:var(--color-text3);font-size:13px">No entries</div>`;
-    }
-
-    html += `</div>`;
-
-    // Nested sub-sections
-    if (section.section?.length) {
-      html += section.section.map(sub => renderSection(sub, depth + 1)).join('');
-    }
-
-    html += `</div>`;
     return html;
   }
 
