@@ -123,20 +123,36 @@ function ImageViewer({ data, url, contentType }: { data?: string; url?: string; 
   );
 }
 
-/** PDF via PDF.js (base64) or iframe (URL) */
-function PdfViewer({ data, url }: { data?: string; url?: string }) {
-  const canvasRef  = useRef<HTMLCanvasElement>(null);
-  const pdfDocRef  = useRef<PdfDoc | null>(null);
-  const renderRef  = useRef<{ cancel: () => void } | null>(null);
-  const [page, setPage]     = useState(1);
-  const [total, setTotal]   = useState(0);
+/** PDF via PDF.js (base64) or iframe (URL), with download / open-in-tab buttons */
+function PdfViewer({ data, url, title }: { data?: string; url?: string; title?: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const pdfDocRef = useRef<PdfDoc | null>(null);
+  const renderRef = useRef<{ cancel: () => void } | null>(null);
+  const [blobUrl, setBlobUrl] = useState('');
+  const [page, setPage]       = useState(1);
+  const [total, setTotal]     = useState(0);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState('');
+  const [error, setError]     = useState('');
+
+  // Build a blob URL from base64 for download / open-in-tab
+  useEffect(() => {
+    if (!data) return;
+    try {
+      const bytes = b64ToBytes(data);
+      const blob  = new Blob([bytes], { type: 'application/pdf' });
+      const bu    = URL.createObjectURL(blob);
+      setBlobUrl(bu);
+      return () => URL.revokeObjectURL(bu);
+    } catch (_) {}
+  }, [data]);
+
+  const filename = title ? (title.endsWith('.pdf') ? title : `${title}.pdf`) : 'document.pdf';
+  const downloadSrc = blobUrl || url;
 
   const renderPage = useCallback(async (num: number) => {
     if (!pdfDocRef.current || !canvasRef.current) return;
     if (renderRef.current) { try { renderRef.current.cancel(); } catch (_) {} }
-    const p  = await pdfDocRef.current.getPage(num);
+    const p      = await pdfDocRef.current.getPage(num);
     const canvas = canvasRef.current;
     const dpr    = window.devicePixelRatio || 1;
     const cw     = (canvas.parentElement?.clientWidth || 800) - 40;
@@ -154,7 +170,7 @@ function PdfViewer({ data, url }: { data?: string; url?: string }) {
   }, []);
 
   useEffect(() => {
-    if (!data) return; // URL PDFs handled by iframe branch
+    if (!data) return;
     let cancelled = false;
     (async () => {
       try {
@@ -186,36 +202,54 @@ function PdfViewer({ data, url }: { data?: string; url?: string }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, total]);
 
-  // URL-based PDF → browser's built-in PDF viewer via iframe
+  // URL-based PDF → browser's built-in viewer via iframe
   if (!data && url) {
     return (
-      <iframe
-        src={url}
-        style={{ flex: 1, border: 'none', width: '100%', minHeight: 480 }}
-        title="PDF"
-      />
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{
+          display: 'flex', gap: 8, padding: '8px 16px', flexShrink: 0,
+          borderBottom: '0.5px solid var(--c-border)', background: 'var(--c-surface2)',
+        }}>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
+            Open in new tab ↗
+          </a>
+          <a href={url} download={filename} className="btn btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
+            ↓ Download PDF
+          </a>
+        </div>
+        <iframe src={url} style={{ flex: 1, border: 'none', width: '100%', minHeight: 0 }} title="PDF" />
+      </div>
     );
   }
 
   return (
-    <>
-      {/* Page controls */}
-      {total > 1 && (
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px',
-          borderBottom: '0.5px solid var(--c-border)', background: 'var(--c-surface2)',
-          flexShrink: 0,
-        }}>
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      {/* Toolbar: page controls + download/open buttons */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10, padding: '8px 16px',
+        borderBottom: '0.5px solid var(--c-border)', background: 'var(--c-surface2)',
+        flexShrink: 0,
+      }}>
+        {total > 1 && (<>
           <button className="btn btn-secondary" style={{ height: 30, padding: '0 12px' }}
             onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>← Prev</button>
           <span style={{ fontSize: 13, color: 'var(--c-text2)' }}>Page {page} of {total}</span>
           <button className="btn btn-secondary" style={{ height: 30, padding: '0 12px' }}
             onClick={() => setPage(p => Math.min(total, p + 1))} disabled={page >= total}>Next →</button>
-        </div>
-      )}
+          <div style={{ flex: 1 }} />
+        </>)}
+        {downloadSrc && (<>
+          <a href={downloadSrc} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
+            Open in new tab ↗
+          </a>
+          <a href={downloadSrc} download={filename} className="btn btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
+            ↓ Download PDF
+          </a>
+        </>)}
+      </div>
       <div style={{ flex: 1, overflowY: 'auto', display: 'flex', justifyContent: 'center', padding: 16, background: '#525659' }}>
         {loading && <Spinner />}
-        {error   && (
+        {error && (
           <div className="mv-placeholder">
             <div className="mv-placeholder-icon">⚠️</div>
             <div style={{ color: 'var(--c-text2)' }}>Failed to load PDF</div>
@@ -224,7 +258,7 @@ function PdfViewer({ data, url }: { data?: string; url?: string }) {
         )}
         {!loading && !error && <canvas ref={canvasRef} style={{ maxWidth: '100%', boxShadow: '0 2px 12px rgba(0,0,0,.5)' }} />}
       </div>
-    </>
+    </div>
   );
 }
 
@@ -312,7 +346,7 @@ export function MediaViewerModal({ item, onClose }: Props) {
 
   function renderBody() {
     switch (cat) {
-      case 'pdf':   return <PdfViewer    data={data} url={url} />;
+      case 'pdf':   return <PdfViewer    data={data} url={url} title={title} />;
       case 'image': return <ImageViewer  data={data} url={url} contentType={contentType} />;
       case 'text':  return <TextViewer   data={data} url={url} />;
       case 'json':  return <JsonViewer   data={data} url={url} />;
