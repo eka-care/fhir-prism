@@ -208,12 +208,12 @@ export function RecordView() {
   }
 
   return (
-    <div style={{ padding: "16px 14px", margin: "0 auto", maxWidth: "1080px" }}>
+    <div className="prism-py-16 prism-px-14 prism-my-0 prism-mx-auto prism-max-w-1050">
       <DocumentBanner />
       <PatientHeader />
       <InfoGrid />
       <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
-      <div style={{ padding: "20px 16px", maxWidth: 900, margin: "0 auto" }}>
+      <div className="prism-py-20 prism-px-16 prism-my-0 prism-mx-auto prism-max-w-900">
         {renderTab()}
       </div>
       <MediaViewerModal item={mediaItem} onClose={() => setMediaItem(null)} />
