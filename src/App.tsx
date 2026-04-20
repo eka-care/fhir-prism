@@ -7,7 +7,7 @@ export default function App() {
   const { view, toast } = useFhir();
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--c-bg)' }}>
+    <div style={{ minHeight: '100vh' }} className='prism-bg-surface-subtle'>
       <Topbar />
       {view === 'upload' ? <UploadPanel /> : <RecordView />}
       <div className={`toast${toast ? ' visible' : ''}`}>{toast}</div>

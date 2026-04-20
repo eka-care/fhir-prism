@@ -213,7 +213,7 @@ export function RecordView() {
       <PatientHeader />
       <InfoGrid />
       <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
-      <div className="prism-py-20 prism-px-16 prism-my-0 prism-mx-auto prism-max-w-900">
+      <div className="prism-py-20 prism-my-0 prism-w-full">
         {renderTab()}
       </div>
       <MediaViewerModal item={mediaItem} onClose={() => setMediaItem(null)} />

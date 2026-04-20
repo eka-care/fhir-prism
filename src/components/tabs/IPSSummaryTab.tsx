@@ -323,21 +323,16 @@ function SectionPanel({ section, depth = 0, defaultOpen = true }: SectionPanelPr
   const totalItems = entries.length || subsections.length;
   const isEmpty    = !entries.length && !subsections.length && !narrative;
 
-  const radiusHead = depth > 0
-    ? { borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0' }
-    : {};
-  const radiusBody = depth > 0
-    ? { borderRadius: `0 0 var(--radius-sm) var(--radius-sm)` }
-    : {};
+  const radiusHeadClass = depth > 0 ? 'prism-rounded-t-7' : '';
+  const radiusBodyClass = depth > 0 ? 'prism-rounded-b-7' : '';
 
   return (
     <div className={depth > 0 ? 'ips-subsection ips-section' : 'ips-section'}>
 
       {/* ── Clickable header ── */}
       <div
-        className="ips-section-head"
-        style={{ ...radiusHead, cursor: 'pointer', userSelect: 'none',
-          borderRadius: open ? radiusHead.borderRadius : 'var(--radius)' }}
+        className={`ips-section-head ${open ? radiusHeadClass : 'prism-rounded-12'}`}
+        style={{ cursor: 'pointer', userSelect: 'none' }}
         onClick={() => setOpen(o => !o)}
         role="button"
         aria-expanded={open}
@@ -365,7 +360,7 @@ function SectionPanel({ section, depth = 0, defaultOpen = true }: SectionPanelPr
 
       {/* ── Collapsible body ── */}
       {open && (
-        <div className="ips-section-body" style={radiusBody}>
+        <div className={`ips-section-body ${radiusBodyClass}`}>
           {/* Empty reason */}
           {emptyReason && entries.length === 0 && subsections.length === 0 && (
             <div className="ips-empty">Not available: {emptyReason}</div>

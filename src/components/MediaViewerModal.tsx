@@ -210,10 +210,24 @@ function PdfViewer({ data, url, title }: { data?: string; url?: string; title?: 
           display: 'flex', gap: 8, padding: '8px 16px', flexShrink: 0,
           borderBottom: '0.5px solid var(--c-border)', background: 'var(--c-surface2)',
         }}>
-          <a href={url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
             Open in new tab ↗
           </a>
-          <a href={url} download={filename} className="btn btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
+          <a href={url} download={filename} className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
             ↓ Download PDF
           </a>
         </div>
@@ -231,18 +245,46 @@ function PdfViewer({ data, url, title }: { data?: string; url?: string; title?: 
         flexShrink: 0,
       }}>
         {total > 1 && (<>
-          <button className="btn btn-secondary" style={{ height: 30, padding: '0 12px' }}
+          <button className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150" style={{ height: 30, padding: '0 12px' }}
             onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1}>← Prev</button>
           <span style={{ fontSize: 13, color: 'var(--c-text2)' }}>Page {page} of {total}</span>
-          <button className="btn btn-secondary" style={{ height: 30, padding: '0 12px' }}
+          <button className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150" style={{ height: 30, padding: '0 12px' }}
             onClick={() => setPage(p => Math.min(total, p + 1))} disabled={page >= total}>Next →</button>
           <div style={{ flex: 1 }} />
         </>)}
         {downloadSrc && (<>
-          <a href={downloadSrc} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
+          <a href={downloadSrc} target="_blank" rel="noopener noreferrer" className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
             Open in new tab ↗
           </a>
-          <a href={downloadSrc} download={filename} className="btn btn-secondary" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
+          <a href={downloadSrc} download={filename} className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150" style={{ height: 30, padding: '0 12px', fontSize: 12 }}>
             ↓ Download PDF
           </a>
         </>)}
@@ -293,7 +335,14 @@ function FallbackViewer({ data, url, contentType, title }: { data?: string; url?
       {/* Always offer open-in-tab + download as backup */}
       <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
         {src && (
-          <a href={src} target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+          <a href={src} target="_blank" rel="noopener noreferrer" className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150">
             Open in new tab ↗
           </a>
         )}
@@ -301,7 +350,14 @@ function FallbackViewer({ data, url, contentType, title }: { data?: string; url?
           <a
             href={`data:${contentType};base64,${data}`}
             download={title || 'attachment'}
-            className="btn btn-secondary"
+            className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150"
           >
             ↓ Download
           </a>
@@ -371,7 +427,14 @@ export function MediaViewerModal({ item, onClose }: Props) {
               {categoryLabel[cat] || cat} · {contentType}
             </div>
           </div>
-          <button className="btn btn-secondary" onClick={onClose} title="Close (Esc)" style={{ flexShrink: 0 }}>✕</button>
+          <button className="hover:prism-bg-bg-doc/10
+          active:prism-scale-95
+          prism-bg-transparent prism-h-36 prism-px-8
+           prism-text-content-secondary
+           prism-border-1
+           prism-border-bg-seperator-dark
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150" onClick={onClose} title="Close (Esc)" style={{ flexShrink: 0 }}>✕</button>
         </div>
 
         {/* Content (fills remaining height) */}
