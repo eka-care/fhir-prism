@@ -19,8 +19,8 @@ export function PatientHeader() {
 
   return (
     <div
-      className="prism-flex prism-items-start prism-gap-16 prism-flex-wrap prism-mb-14"
-      style={{ background: 'var(--c-surface)', border: '0.5px solid var(--c-border)', borderRadius: 'var(--radius)', padding: '16px 20px' }}
+      className="prism-flex prism-items-start prism-gap-16 prism-flex-wrap prism-mb-14 prism-rounded-12"
+      style={{ background: 'var(--c-surface)', border: '0.5px solid var(--c-border)', padding: '16px 20px' }}
     >
       {/* Avatar */}
       <div

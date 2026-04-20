@@ -1,9 +1,15 @@
-import { useRef, useState, type DragEvent, type ChangeEvent } from 'react';
-import { useFhirStore } from '../store/fhirStore';
+import { useRef, useState, type DragEvent, type ChangeEvent } from "react";
+import { useFhirStore } from "../store/fhirStore";
 
 const DOC_TYPE_CHIPS = [
-  'OPD Consultation', 'Discharge Summary', 'Lab Report',
-  'Prescription', 'Immunization', 'Invoice', 'Wellness Record', 'Health Document',
+  "OPD Consultation",
+  "Discharge Summary",
+  "Lab Report",
+  "Prescription",
+  "Immunization",
+  "Invoice",
+  "Wellness Record",
+  "Health Document",
 ];
 
 export function UploadPanel() {
@@ -13,14 +19,20 @@ export function UploadPanel() {
 
   function readFile(file: File) {
     const reader = new FileReader();
-    reader.onload = e => loadJson(e.target?.result as string);
+    reader.onload = (e) => loadJson(e.target?.result as string);
     reader.readAsText(file);
   }
 
-  function onDragOver(e: DragEvent) { e.preventDefault(); setDragging(true); }
-  function onDragLeave() { setDragging(false); }
+  function onDragOver(e: DragEvent) {
+    e.preventDefault();
+    setDragging(true);
+  }
+  function onDragLeave() {
+    setDragging(false);
+  }
   function onDrop(e: DragEvent) {
-    e.preventDefault(); setDragging(false);
+    e.preventDefault();
+    setDragging(false);
     const file = e.dataTransfer.files[0];
     if (file) readFile(file);
   }
@@ -29,82 +41,80 @@ export function UploadPanel() {
   }
 
   return (
-    <div className="prism-max-w-[720px] prism-mx-auto prism-py-24">
+    <div className="prism-max-w-720 prism-mx-auto prism-py-24">
       {/* Dropzone */}
       <div
         onClick={() => fileInputRef.current?.click()}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
-        style={{
-          border: `1.5px dashed ${dragging ? 'var(--c-blue)' : 'var(--c-border2)'}`,
-          borderRadius: 'var(--radius)',
-          padding: '52px 24px',
-          textAlign: 'center',
-          cursor: 'pointer',
-          background: dragging ? 'var(--c-blue-bg)' : 'var(--c-surface)',
-          transition: 'border-color 0.2s, background 0.2s',
-        }}
+        className={`prism-rounded-12 prism-cursor-pointer prism-px-52 prism-py-24 prism-text-center prism-border-dashed
+          ${
+            dragging
+              ? "prism-border-2  prism-border-text-primary-dark prism-bg-text-primary-dark/20"
+              : "prism-border-2 prism-border-border-neutral prism-bg-surface-base prism-transition-colors prism-duration-200"
+          }`}
       >
-        <div style={{ fontSize: 32, marginBottom: 10, opacity: 0.6 }}>📄</div>
-        <h3 style={{ fontSize: 16, fontWeight: 500, marginBottom: 5 }}>Drop a FHIR Bundle JSON here</h3>
-        <p style={{ fontSize: 13, color: 'var(--c-text2)' }}>or click to browse · Supports all ABDM / NDHM document types</p>
+        <div className="prism-text-32 prism-mb-10 prism-opacity-60">📄</div>
+        <h3 className="prism-text-16 prism-mb-5 prism-font-500">
+          Drop a FHIR Bundle JSON here
+        </h3>
+        <p className="prism-text-13 prism-text-content-secondary">
+          or click to browse · Supports all ABDM / NDHM document types
+        </p>
         <div className="prism-flex prism-flex-wrap prism-justify-center prism-gap-6 prism-mt-14">
-          {DOC_TYPE_CHIPS.map(chip => (
+          {DOC_TYPE_CHIPS.map((chip) => (
             <span
               key={chip}
-              style={{
-                fontSize: 11, padding: '3px 9px', borderRadius: 10,
-                background: 'var(--c-surface2)', border: '0.5px solid var(--c-border2)', color: 'var(--c-text2)',
-              }}
-            >{chip}</span>
+              className="prism-text-11 prism-px-9 prism-py-3 prism-rounded-10 prism-bg-surface-muted prism-text-content-secondary prism-border-border-03 "
+            >
+              {chip}
+            </span>
           ))}
         </div>
       </div>
 
       <input
+        className="prism-hidden"
         ref={fileInputRef}
         type="file"
         accept=".json,application/json"
         onChange={onFileChange}
-        style={{ display: 'none' }}
       />
 
       {/* Or divider */}
-      <div
-        className="prism-flex prism-items-center prism-gap-10 prism-my-16"
-        style={{ color: 'var(--c-text3)', fontSize: 12 }}
-      >
-        <div style={{ flex: 1, height: '0.5px', background: 'var(--c-border2)' }} />
+      <div className="prism-flex prism-items-center prism-gap-10 prism-my-16 prism-text-content-secondary prism-text-12">
+        <div className="prism-flex-1 prism-h-1 prism-bg-surface-muted" />
         or paste JSON
-        <div style={{ flex: 1, height: '0.5px', background: 'var(--c-border2)' }} />
+        <div className="prism-flex-1 prism-h-1 prism-bg-surface-muted" />
       </div>
 
       {/* Paste area */}
       <textarea
         value={pasteText}
-        onChange={e => setPasteText(e.target.value)}
+        onChange={(e) => setPasteText(e.target.value)}
         placeholder='{"resourceType":"Bundle","type":"document","entry":[...]}'
-        style={{
-          width: '100%', height: 100, resize: 'vertical',
-          fontFamily: 'var(--font-mono)', fontSize: 12,
-          borderRadius: 'var(--radius-sm)', padding: '10px 12px',
-          border: '0.5px solid var(--c-border2)',
-          background: 'var(--c-surface2)', color: 'var(--c-text)',
-          outline: 'none',
-        }}
-        onFocus={e => (e.target.style.borderColor = 'var(--c-blue)')}
-        onBlur={e => (e.target.style.borderColor = 'var(--c-border2)')}
+        className="focus:prism-border-border-doc/20 prism-rounded-7 prism-w-full prism-h-100 
+        prism-outline-0 prism-text-12 prism-px-12 prism-py-10 prism-resize-y prism-bg-surface-base prism-border-1 prism-border-surface-muted prism-text-content-secondary"
       />
 
       <div className="prism-flex prism-gap-8 prism-mt-10 prism-items-center">
         <button
-          className="btn btn-primary"
-          onClick={() => { if (pasteText.trim()) loadJson(pasteText.trim()); }}
+          className="
+          hover:prism-opacity-85
+          active:prism-scale-95
+          prism-bg-bg-doc prism-h-36 prism-px-8 prism-text-text-invert
+          prism-inline-flex prism-items-center prism-gap-6 prism-shrink-0 prism-whitespace-nowrap prism-rounded-7 prism-text-13 
+          prism-font-500 prism-cursor-pointer prism-transition-all prism-duration-150"
+          onClick={() => {
+            if (pasteText.trim()) loadJson(pasteText.trim());
+          }}
         >
           Parse &amp; view
         </button>
-        <span style={{ fontSize: 12, color: 'var(--c-text2)' }}>R4 · eka.care · HAPI · any NDHM-conformant bundle</span>
+        <span className="prism-text-content-secondary prism-text-12">
+          R4 · eka.care · HAPI · any NDHM-conformant bundle
+        </span>
       </div>
     </div>
   );
