@@ -24,6 +24,12 @@ import { EncountersTab } from "./tabs/EncountersTab";
 import { DocumentRefsTab } from "./tabs/DocumentRefsTab";
 import { CarePlanTab } from "./tabs/CarePlanTab";
 import { CoverageTab } from "./tabs/CoverageTab";
+import { EligibilityRequestTab } from "./tabs/EligibilityRequestTab";
+import { EligibilityResponseTab } from "./tabs/EligibilityResponseTab";
+import { ClaimsTab } from "./tabs/ClaimsTab";
+import { ClaimResponseTab } from "./tabs/ClaimResponseTab";
+import { InsurancePlanTab } from "./tabs/InsurancePlanTab";
+import { QuestionnairesTab } from "./tabs/QuestionnairesTab";
 import { DevicesTab } from "./tabs/DevicesTab";
 import { AlertsTab } from "./tabs/AlertsTab";
 import { DirectivesTab } from "./tabs/DirectivesTab";
@@ -51,7 +57,13 @@ function isIpsDoc(docTypeName: string): boolean {
 
 export function RecordView() {
   const { resourceMap, docType } = useFhir();
-  const [activeTab, setActiveTab] = useState("overview");
+  // Patient-less insurance bundles (e.g. an InsurancePlan catalog) have nothing
+  // clinical to show on Overview — land on the Insurance Plan tab instead.
+  const [activeTab, setActiveTab] = useState(() =>
+    !resourceMap["Patient"]?.length && resourceMap["InsurancePlan"]?.length
+      ? "insurancePlan"
+      : "overview",
+  );
   const [mediaItem, setMediaItem] = useState<MediaItem | null>(null);
 
   const ips = isIpsDoc(docType.name);
@@ -127,10 +139,40 @@ export function RecordView() {
       label: "Care Plan",
       count: count(resourceMap, "CarePlan", "Goal"),
     },
+    count(resourceMap, "CoverageEligibilityRequest") > 0 && {
+      id: "eligibilityRequest",
+      label: "Eligibility Req",
+      count: count(resourceMap, "CoverageEligibilityRequest"),
+    },
+    count(resourceMap, "CoverageEligibilityResponse") > 0 && {
+      id: "eligibilityResponse",
+      label: "Eligibility Resp",
+      count: count(resourceMap, "CoverageEligibilityResponse"),
+    },
+    count(resourceMap, "Claim") > 0 && {
+      id: "claims",
+      label: "Claims",
+      count: count(resourceMap, "Claim"),
+    },
+    count(resourceMap, "ClaimResponse") > 0 && {
+      id: "claimResponse",
+      label: "Claim Resp",
+      count: count(resourceMap, "ClaimResponse"),
+    },
+    count(resourceMap, "InsurancePlan") > 0 && {
+      id: "insurancePlan",
+      label: "Insurance Plan",
+      count: count(resourceMap, "InsurancePlan"),
+    },
     count(resourceMap, "Coverage") > 0 && {
       id: "coverage",
       label: "Coverage",
       count: count(resourceMap, "Coverage"),
+    },
+    count(resourceMap, "Questionnaire") > 0 && {
+      id: "questionnaires",
+      label: "Questionnaires",
+      count: count(resourceMap, "Questionnaire"),
     },
     count(resourceMap, "Device", "DeviceUseStatement") > 0 && {
       id: "devices",
@@ -186,8 +228,20 @@ export function RecordView() {
         return <DocumentRefsTab onOpenMedia={setMediaItem} />;
       case "careplan":
         return <CarePlanTab />;
+      case "eligibilityRequest":
+        return <EligibilityRequestTab />;
+      case "eligibilityResponse":
+        return <EligibilityResponseTab />;
+      case "claims":
+        return <ClaimsTab />;
+      case "claimResponse":
+        return <ClaimResponseTab />;
+      case "insurancePlan":
+        return <InsurancePlanTab />;
       case "coverage":
         return <CoverageTab />;
+      case "questionnaires":
+        return <QuestionnairesTab />;
       case "devices":
         return <DevicesTab />;
       case "alerts":

@@ -13,7 +13,22 @@ export const ABDM_DOC_TYPES: Record<string, DocType> = {
   WellnessRecord:         { name: 'Wellness Record',        icon: '❤️', color: 'icon-red',    tag: 'tag-red',    desc: 'Wellness & lifestyle' },
   HealthDocumentRecord:   { name: 'Health Document',        icon: '📋', color: 'icon-gray',   tag: 'tag-gray',   desc: 'General health record' },
   PatientSummary:         { name: 'Patient Summary (IPS)',  icon: '🌐', color: 'icon-purple', tag: 'tag-purple', desc: 'International Patient Summary' },
+  CoverageEligibilityRequest:  { name: 'Eligibility Request',  icon: '🛡', color: 'icon-blue',  tag: 'tag-blue',  desc: 'Insurance eligibility check' },
+  CoverageEligibilityResponse: { name: 'Eligibility Response', icon: '🛡', color: 'icon-teal',  tag: 'tag-teal',  desc: 'Insurer eligibility reply' },
+  Claim:                       { name: 'Health Claim',         icon: '🏥', color: 'icon-purple', tag: 'tag-purple', desc: 'Insurance claim / preauth' },
+  ClaimResponse:               { name: 'Claim Response',       icon: '🏥', color: 'icon-green',  tag: 'tag-green',  desc: 'Claim adjudication outcome' },
+  InsurancePlan:               { name: 'Insurance Plan',       icon: '🛡', color: 'icon-teal',   tag: 'tag-teal',   desc: 'Insurance product & benefits' },
 };
+
+// NHCX focus resource types, most-specific first. Shared by the parser
+// (document-type detection) and the store (load guard for Patient-less bundles).
+export const NHCX_FOCUS_TYPES = [
+  'ClaimResponse',
+  'Claim',
+  'CoverageEligibilityResponse',
+  'CoverageEligibilityRequest',
+  'InsurancePlan',
+] as const;
 
 export const DEFAULT_DOC_TYPE: DocType = {
   name: 'FHIR Document', icon: '📄', color: 'icon-blue', tag: 'tag-blue', desc: 'FHIR document',

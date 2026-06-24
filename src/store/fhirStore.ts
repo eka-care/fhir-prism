@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { ResourceMap, FhirBundle, DocType } from '../lib/types';
-import { DEFAULT_DOC_TYPE } from '../lib/constants';
+import { DEFAULT_DOC_TYPE, NHCX_FOCUS_TYPES } from '../lib/constants';
 import { parseBundle as doParse } from '../lib/parser';
 
 export interface StatusInfo {
@@ -48,9 +48,14 @@ export const useFhirStore = create<FhirState>((set, get) => ({
       set({ status: { type: 'err', text: result.error } });
       return;
     }
-    if (!result.resourceMap['Patient']?.length) {
-      showToast('No Patient resource found');
-      set({ status: { type: 'err', text: 'No Patient resource found' } });
+    // Clinical bundles are patient-centric; NHCX insurance bundles (e.g. an
+    // InsurancePlan catalog or a claim/eligibility message) may legitimately
+    // carry no Patient, so also accept a recognized NHCX focus resource.
+    const hasPatient = !!result.resourceMap['Patient']?.length;
+    const hasNhcxFocus = NHCX_FOCUS_TYPES.some(t => result.resourceMap[t]?.length);
+    if (!hasPatient && !hasNhcxFocus) {
+      showToast('No Patient or insurance resource found');
+      set({ status: { type: 'err', text: 'No Patient or insurance resource found' } });
       return;
     }
     const totalEntries = (result.rawBundle.entry || []).length;
