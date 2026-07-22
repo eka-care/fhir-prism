@@ -1,5 +1,5 @@
 import type { FhirBundle, FhirResource, ResourceMap, DocType } from './types';
-import { ABDM_DOC_TYPES, DEFAULT_DOC_TYPE } from './constants';
+import { ABDM_DOC_TYPES, DEFAULT_DOC_TYPE, NHCX_FOCUS_TYPES } from './constants';
 import { isLabObservation } from './helpers';
 
 export interface ParseResult {
@@ -9,7 +9,35 @@ export interface ParseResult {
   error?: string;
 }
 
-function detectDocumentType(resourceMap: ResourceMap): DocType {
+function detectNhcxType(resourceMap: ResourceMap, bundle: FhirBundle): DocType | null {
+  const hasMessageHeader = !!resourceMap['MessageHeader']?.length;
+  const isMessage = bundle.type === 'message';
+  const hasFocusResource = NHCX_FOCUS_TYPES.some(t => resourceMap[t]?.length);
+
+  // Only treat as NHCX when there's no clinical Composition driving the doc.
+  if (resourceMap['Composition']?.length) return null;
+  if (!hasMessageHeader && !isMessage && !hasFocusResource) return null;
+
+  // 1) Prefer MessageHeader.focus reference type.
+  const header = resourceMap['MessageHeader']?.[0];
+  const focusRef = header?.focus?.[0]?.reference as string | undefined;
+  if (focusRef) {
+    const focusType = focusRef.split('/')[0];
+    if (ABDM_DOC_TYPES[focusType]) return ABDM_DOC_TYPES[focusType];
+  }
+
+  // 2) Fall back to whichever focus resource is present (most-specific first).
+  for (const t of NHCX_FOCUS_TYPES) {
+    if (resourceMap[t]?.length) return ABDM_DOC_TYPES[t];
+  }
+
+  return null;
+}
+
+function detectDocumentType(resourceMap: ResourceMap, bundle: FhirBundle): DocType {
+  const nhcx = detectNhcxType(resourceMap, bundle);
+  if (nhcx) return nhcx;
+
   const compositions = resourceMap['Composition'] || [];
   if (!compositions.length) return { ...DEFAULT_DOC_TYPE };
 
@@ -77,6 +105,6 @@ export function parseBundle(jsonText: string): ParseResult {
     resourceMap[resource.resourceType].push(resource);
   });
 
-  const docType = detectDocumentType(resourceMap);
+  const docType = detectDocumentType(resourceMap, bundle);
   return { resourceMap, rawBundle: bundle, docType };
 }

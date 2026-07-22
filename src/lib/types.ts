@@ -390,6 +390,183 @@ export interface FhirComposition {
   section?: FhirSection[];
 }
 
+export interface FhirMoney {
+  value?: number;
+  currency?: string;
+}
+
+export interface FhirMessageHeader {
+  resourceType: 'MessageHeader';
+  id?: string;
+  eventCoding?: FhirCoding;
+  focus?: FhirReference[];
+  source?: { endpoint?: string; name?: string };
+  destination?: Array<{ endpoint?: string; receiver?: FhirReference }>;
+}
+
+export interface FhirClaimItem {
+  sequence?: number;
+  productOrService?: FhirCodeableConcept;
+  unitPrice?: FhirMoney;
+  net?: FhirMoney;
+}
+
+export interface FhirClaim {
+  resourceType: 'Claim';
+  id?: string;
+  identifier?: FhirIdentifier[];
+  status?: string;
+  type?: FhirCodeableConcept;
+  subType?: FhirCodeableConcept;
+  use?: string; // claim | preauthorization | predetermination
+  created?: string;
+  insurer?: FhirReference;
+  provider?: FhirReference;
+  priority?: FhirCodeableConcept;
+  billablePeriod?: FhirPeriod;
+  total?: FhirMoney;
+  item?: FhirClaimItem[];
+}
+
+export interface FhirClaimResponse {
+  resourceType: 'ClaimResponse';
+  id?: string;
+  identifier?: FhirIdentifier[];
+  status?: string;
+  type?: FhirCodeableConcept;
+  use?: string;
+  outcome?: string; // queued | complete | error | partial
+  disposition?: string;
+  created?: string;
+  insurer?: FhirReference;
+  requestor?: FhirReference;
+  request?: FhirReference;
+  payment?: { type?: FhirCodeableConcept; amount?: FhirMoney; date?: string };
+  total?: Array<{ category?: FhirCodeableConcept; amount?: FhirMoney }>;
+  error?: Array<{ code?: FhirCodeableConcept }>;
+}
+
+export interface FhirEligibilityBenefit {
+  type?: FhirCodeableConcept;
+  allowedMoney?: FhirMoney;
+  allowedUnsignedInt?: number;
+  allowedString?: string;
+  usedMoney?: FhirMoney;
+  usedUnsignedInt?: number;
+}
+
+export interface FhirEligibilityItem {
+  category?: FhirCodeableConcept;
+  productOrService?: FhirCodeableConcept;
+  excluded?: boolean;
+  name?: string;
+  network?: FhirCodeableConcept;
+  unit?: FhirCodeableConcept;
+  term?: FhirCodeableConcept;
+  benefit?: FhirEligibilityBenefit[];
+}
+
+export interface FhirCoverageEligibilityRequest {
+  resourceType: 'CoverageEligibilityRequest';
+  id?: string;
+  identifier?: FhirIdentifier[];
+  status?: string;
+  purpose?: string[]; // auth-requirement | benefits | discovery | validation
+  created?: string;
+  insurer?: FhirReference;
+  provider?: FhirReference;
+  servicedDate?: string;
+  servicedPeriod?: FhirPeriod;
+  insurance?: Array<{ coverage?: FhirReference; focal?: boolean }>;
+}
+
+export interface FhirCoverageEligibilityResponse {
+  resourceType: 'CoverageEligibilityResponse';
+  id?: string;
+  identifier?: FhirIdentifier[];
+  status?: string;
+  purpose?: string[];
+  outcome?: string;
+  disposition?: string;
+  created?: string;
+  insurer?: FhirReference;
+  request?: FhirReference;
+  insurance?: Array<{
+    coverage?: FhirReference;
+    inforce?: boolean;
+    item?: FhirEligibilityItem[];
+  }>;
+}
+
+export interface FhirInsurancePlanBenefit {
+  type?: FhirCodeableConcept;
+  requirement?: string;
+  limit?: Array<{ value?: FhirQuantity; code?: FhirCodeableConcept }>;
+}
+
+export interface FhirInsurancePlanCoverage {
+  type?: FhirCodeableConcept;
+  network?: FhirReference[];
+  benefit?: FhirInsurancePlanBenefit[];
+}
+
+export interface FhirInsurancePlanGeneralCost {
+  type?: FhirCodeableConcept;
+  groupSize?: number;
+  cost?: FhirMoney;
+  comment?: string;
+}
+
+export interface FhirInsurancePlanPlan {
+  identifier?: FhirIdentifier[];
+  type?: FhirCodeableConcept;
+  generalCost?: FhirInsurancePlanGeneralCost[];
+  specificCost?: Array<{
+    category?: FhirCodeableConcept;
+    benefit?: Array<{
+      type?: FhirCodeableConcept;
+      cost?: Array<{ type?: FhirCodeableConcept; value?: FhirQuantity; amount?: FhirMoney }>;
+    }>;
+  }>;
+}
+
+export interface FhirInsurancePlan {
+  resourceType: 'InsurancePlan';
+  id?: string;
+  identifier?: FhirIdentifier[];
+  status?: string;
+  type?: FhirCodeableConcept[];
+  name?: string;
+  alias?: string[];
+  period?: FhirPeriod;
+  ownedBy?: FhirReference;
+  administeredBy?: FhirReference;
+  coverage?: FhirInsurancePlanCoverage[];
+  plan?: FhirInsurancePlanPlan[];
+  contact?: Array<{ purpose?: FhirCodeableConcept; name?: FhirName; telecom?: FhirTelecom[] }>;
+}
+
+export interface FhirQuestionnaireItem {
+  linkId?: string;
+  prefix?: string;
+  text?: string;
+  type?: string;
+  required?: boolean;
+  answerOption?: Array<{ valueString?: string; valueCoding?: FhirCoding; valueInteger?: number }>;
+  item?: FhirQuestionnaireItem[];
+}
+
+export interface FhirQuestionnaire {
+  resourceType: 'Questionnaire';
+  id?: string;
+  url?: string;
+  name?: string;
+  title?: string;
+  status?: string;
+  code?: FhirCodeableConcept[];
+  item?: FhirQuestionnaireItem[];
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type FhirResource = Record<string, any> & { resourceType: string };
 
