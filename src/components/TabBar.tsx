@@ -51,10 +51,10 @@ export function TabBar({ tabs, active, onChange }: Props) {
             style={{
               fontSize: 13,
               fontWeight: isActive ? 600 : 400,
-              color: isActive ? "var(--c-blue-dk)" : "var(--c-text2)",
+              color: isActive ? "var(--c-blue)" : "var(--c-text2)",
 
               borderBottom: isActive
-                ? "2px solid var(--c-blue-dk)"
+                ? "2px solid var(--c-blue)"
                 : "2px solid transparent",
 
               transition: "color 0.15s, border-color 0.15s",
@@ -66,7 +66,7 @@ export function TabBar({ tabs, active, onChange }: Props) {
                 style={{
                   fontSize: 11,
                   fontWeight: 600,
-                  color: isActive ? "var(--c-blue-dk)" : "var(--c-text3)",
+                  color: isActive ? "var(--c-blue)" : "var(--c-text3)",
                   background: isActive
                     ? "var(--c-blue-bg)"
                     : "var(--c-surface2)",
